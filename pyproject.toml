@@ -1,0 +1,19 @@
+[tool.ruff]
+select = ["E", "F"]
+line-length = 88
+
+[tool.ruff.isort]
+lines-after-imports = 2
+
+[tool.black]
+line-length = 88
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+	"ignore::UserWarning"
+]
