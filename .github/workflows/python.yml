@@ -42,7 +42,7 @@ jobs:
           python -m pip install -r .devcontainer/requirements.txt
       - name: Ruff
         run: |
-          ruff check src
+          ruff check hivegraph
       - name: Test with PyTest
         run: |
           pytest -v .
