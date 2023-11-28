@@ -19,6 +19,6 @@ test:
 
 ## Basic linting
 lint:
-	black src
-	ruff check src
-	mypy src
+	black hivegraph
+	ruff check hivegraph
+	mypy hivegraph
