@@ -1,7 +1,14 @@
 black
+iterative-stratification
+ml-collections
 mypy>=0.900
 numpy>=1.22.0
 pre-commit>=2.18.0
 pytest>=6.0.0
+rich
 ruff
 scipy>=1.10.0
+torch>=2.0.0
+torch-geometric
+torchmetrics
+wandb>=0.13.6

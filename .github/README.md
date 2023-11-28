@@ -1,2 +1,2 @@
-# python-template
-General Purpose Repository Template for Python Projects
+# HiveGraph
+Python Framework for working with Graph Neural Networks

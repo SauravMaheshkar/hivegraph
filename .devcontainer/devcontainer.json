@@ -1,5 +1,5 @@
 {
-    "name": "Python Project Template",
+    "name": "hivegraph",
     "build": {
         "dockerfile": "./Containerfile",
         "context": "."

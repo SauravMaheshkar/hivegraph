@@ -1,19 +1,40 @@
-[tool.ruff]
-select = ["E", "F"]
-line-length = 88
-
-[tool.ruff.isort]
-lines-after-imports = 2
+[tool.isort]
+profile = "black"
 
 [tool.black]
 line-length = 88
 
+[tool.pylint.messages_control]
+disable = [
+    "no-member",
+    "too-many-arguments",
+    "too-few-public-methods",
+    "no-else-return",
+    "duplicate-code",
+    "too-many-branches",
+    "redefined-builtin",
+    "dangerous-default-value",
+]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.mypy]
+disable_error_code = "attr-defined"
+
 [[tool.mypy.overrides]]
+module = [
+    "absl.*",
+    "hivegraph.*",
+    "torch_geometric.*",
+    "ml_collections.*",
+    "sklearn.model_selection",
+    "iterstrat.ml_stratifiers",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
+pythonpath = "."
 testpaths = ["tests"]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-	"ignore::UserWarning"
-]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]
+markers = ["io: Tests that perform IO operations."]
