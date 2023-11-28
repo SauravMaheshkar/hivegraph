@@ -1,3 +1,54 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+description = "Python Framework based on PyG for working with Graph Neural Networks"
+name = "hivegraph"
+version = "0.0.1"
+authors = [{ name = "Saurav Maheshkar", email = "sauravvmaheshkar@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = [
+    "deep-learning",
+    "pytorch",
+    "geometric-deep-learning",
+    "graph-neural-networks",
+    "graph-convolutional-networks",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = [
+    "iterative-stratification",
+    "ml-collections",
+    "numpy",
+    "rich",
+    "scipy>=1.10.0",
+    "torch>=2.0.0",
+    "torch-geometric",
+    "torchmetrics",
+    "wandb>=0.13.6",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["hivegraph[test]", "black", "mypy>=0.900", "pre-commit>=2.18.0", "ruff"]
+
+[project.urls]
+homepage = "https://github.com/SauravMaheshkar/hivegraph"
+repository = "https://github.com/SauravMaheshkar/hivegraph"
+
+[tool.flit.module]
+name = "hivegraph"
+
 [tool.isort]
 profile = "black"
 
