@@ -1,4 +1,4 @@
 paths:
-  - src
+  - hivegraph
 paths-ignore:
-  - 'tests/**'
+  - "tests/**"

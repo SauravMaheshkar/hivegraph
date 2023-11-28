@@ -9,9 +9,10 @@
 .ruff_cache/
 
 data/
+wandb/
 models/
 notebooks/
 
 **/.DS_Store
-README.md
+.github/README.md
 LICENSE

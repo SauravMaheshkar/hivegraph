@@ -1,2 +1,13 @@
-# python-template
-General Purpose Repository Template for Python Projects
+# HiveGraph
+Python Framework for working with Graph Neural Networks
+
+Currently has implementations for :-
+
+* Graph Isomorphism Networks (GIN)
+* Graph Convolutional Networks (GCN)
+* Residual Gated Graph Convolutional Networks (ResGatedGCN)
+
+Example Training Script
+```
+python train.py --config=src/configs/gin.py
+```

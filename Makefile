@@ -11,6 +11,7 @@ clean:
 	rm -rf .mypy_cache/
 	rm -rf .pytest_cache/
 	rm -rf .ruff_cache/
+	rm -rf wandb/
 
 ## Testing
 test:
@@ -18,6 +19,6 @@ test:
 
 ## Basic linting
 lint:
-	black src
-	ruff check src
-	mypy src
+	black hivegraph
+	ruff check hivegraph
+	mypy hivegraph
