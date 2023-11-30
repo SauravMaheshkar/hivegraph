@@ -46,4 +46,4 @@ jobs:
           context: ./
           file: .devcontainer/Containerfile
           push: true
-          tags: ${{ env.IMAGE_NAME }}:latest
+          tags: hivegraph:latest
