@@ -1,6 +1,12 @@
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 import torch
+import torch.nn.functional as F
+from torch_geometric.nn import GCNConv
+from torch_geometric.utils import dropout_adj
+
+from hivegraph.augmentations import drop_feature
+
 
 __all__: List[str] = ["GRACE"]
 
@@ -8,18 +14,28 @@ __all__: List[str] = ["GRACE"]
 class GRACE(torch.nn.Module):
     def __init__(
         self,
-        encoder_module: torch.nn.Module,
-        hidden_dim: int,
-        projection_dim: int,
+        num_features: int,
+        hidden: int,
+        num_layers: int,
+        activation: Callable = F.relu,
+        base_model: torch.nn.Module = GCNConv,
+        projection_dim: int = 128,
         tau: Optional[float] = 0.5,
+        model_name: str = "GRACE",
         **kwargs,
     ) -> None:
         super(GRACE, self).__init__(**kwargs)
-        self.encoder_module = encoder_module
+        self.encoder_module = GRACEEncoder(
+            in_channels=num_features,
+            out_channels=hidden,
+            activation=activation,
+            base_model=base_model,
+            k=num_layers,
+        )
         self.tau = tau
 
         self.projection_head = torch.nn.Sequential(
-            torch.nn.Linear(hidden_dim, projection_dim),
+            torch.nn.Linear(hidden, projection_dim),
             torch.nn.ELU(),
             torch.nn.Linear(projection_dim, projection_dim),
         )
@@ -36,6 +52,44 @@ class GRACE(torch.nn.Module):
             torch.Tensor: Representations from the encoder module.
         """
         return self.encoder_module(x, edge_index)
+
+    def train_step(
+        self,
+        x: torch.Tensor,
+        edge_index: torch.Tensor,
+        drop_edge_rate_1: float,
+        drop_edge_rate_2: float,
+        drop_feature_rate_1: float,
+        drop_feature_rate_2: float,
+    ) -> torch.Tensor:
+        """
+        Perform a single training step.
+
+        Args:
+            x (torch.Tensor): Node features.
+            edge_index (torch.Tensor): Edge indices.
+
+        Returns:
+            float: Loss.
+        """
+        # Generate Graph Views
+
+        ## Removing Edges (RE)
+        edge_index_1 = dropout_adj(edge_index, p=drop_edge_rate_1)[0]
+        edge_index_2 = dropout_adj(edge_index, p=drop_edge_rate_2)[0]
+
+        ## Masking Node Features (MF)
+        x_1 = drop_feature(x, drop_prob=drop_feature_rate_1)
+        x_2 = drop_feature(x, drop_prob=drop_feature_rate_2)
+
+        ## Generating views
+        z1 = self.forward(x_1, edge_index_1)
+        z2 = self.forward(x_2, edge_index_2)
+
+        # Calculate Loss
+        loss = self.loss(z1, z2, batch_size=0)
+
+        return loss
 
     def project(self, z: torch.Tensor) -> torch.Tensor:
         """
@@ -198,3 +252,30 @@ class GRACE(torch.nn.Module):
             torch.Tensor: Normalized tensor.
         """
         return torch.exp(x / self.tau)
+
+
+class GRACEEncoder(torch.nn.Module):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        activation: Callable = F.relu,
+        base_model=GCNConv,
+        k: int = 2,
+    ) -> None:
+        super(GRACEEncoder, self).__init__()
+        self.base_model = base_model
+
+        assert k >= 2, "k needs to be atleast 2"
+        self.k = k
+        self.conv = [base_model(in_channels, 2 * out_channels)]
+        for _ in range(1, k - 1):
+            self.conv.append(base_model(2 * out_channels, 2 * out_channels))
+        self.conv.append(base_model(2 * out_channels, out_channels))
+        self.conv = torch.nn.ModuleList(self.conv)  # type: ignore[assignment]
+        self.activation = activation
+
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        for i in range(self.k):
+            x = self.activation(self.conv[i](x, edge_index))
+        return x
