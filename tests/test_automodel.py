@@ -15,7 +15,7 @@ HIDDEN_DIM: int = 32
     [
         ("classification", "GCN"),
         ("classification", "GIN"),
-        ("contrastive", "GRACE"),
+        ("transductive", "GRACE"),
     ],
 )
 def test_automodel(get_dataset, task: str, model_name: str) -> None:
@@ -39,7 +39,7 @@ def test_automodel(get_dataset, task: str, model_name: str) -> None:
     if task == "classification":
         out = model(get_dataset[0])
         assert out.shape == (1, get_dataset.num_classes)
-    elif task == "contrastive":
+    elif task == "transductive":
         data = get_dataset[0]
         out = model(data.x, data.edge_index)
         assert out.shape == (len(data.x), HIDDEN_DIM)

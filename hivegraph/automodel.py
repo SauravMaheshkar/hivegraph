@@ -16,7 +16,7 @@ def AutoModel(task: str, model_config: ml_collections.ConfigDict, **kwargs):
             return GCN(**model_config, **kwargs)
         else:
             raise ValueError(f"Model {model_config.model_name} not supported.")
-    elif task == "contrastive":
+    elif task == "transductive":
         if model_config.model_name == "GRACE":
             return GRACE(**model_config, **kwargs)
         else:
