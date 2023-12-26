@@ -13,18 +13,21 @@ from torch_geometric.data.dataset import Dataset
 from torch_geometric.loader import DataLoader
 from torch_geometric.loader import DenseDataLoader as DenseLoader
 
+from hivegraph.engine.base import BaseTrainer
 from hivegraph.io.autodataset import (
     BINARY_CLASSIFICATION_DATASTES,
     MULTI_CLASSIFICATION_DATASETS,
     SUPPORTED_DATASETS,
 )
+from hivegraph.utils import num_graphs
 
-__all__: List[str] = ["Trainer"]
+
+__all__: List[str] = ["ClassificationTrainer"]
 
 
-class Trainer:
+class ClassificationTrainer(BaseTrainer):
     """
-    Custom Trainer Class
+    Custom Trainer Class for Classification Tasks
     """
 
     def __init__(
@@ -301,22 +304,6 @@ def get_kfold_indices(
         train_indices.append(train_mask.nonzero(as_tuple=False).view(-1))
 
     return train_indices, test_indices, val_indices
-
-
-def num_graphs(data: Data) -> int:
-    """
-    Utility function to return the number of graphs in a data object
-
-    Args:
-        data(Data): Data object
-
-    Returns:
-        Number of graphs in the data object
-    """
-    if hasattr(data, "num_graphs"):
-        return data.num_graphs
-    else:
-        return data.x.size(0)
 
 
 def binary_accuracy(model: torch.nn.Module, data: Data) -> torch.Tensor:
