@@ -1,6 +1,7 @@
 import ml_collections
 import torch.nn as nn
 
+
 __all__ = ["get_config", "get_model_config"]
 
 
@@ -8,6 +9,7 @@ def get_config() -> ml_collections.ConfigDict:
     """Get Hyperparameter Configuration"""
     config = ml_collections.ConfigDict()
 
+    config.task = "classification"
     config.random_seed = 3  # Run for 7 and 3
     config.dataset = "MUTAG"
     config.criterion = (
@@ -33,7 +35,7 @@ def get_model_config() -> ml_collections.ConfigDict:
     """Get Model Hyperparameter Configuration"""
     model_config = ml_collections.ConfigDict()
 
-    model_config.model_name = "gcn"
+    model_config.model_name = "GCN"
     model_config.num_layers = 5
     model_config.hidden = 32
     model_config.dropout = 0.5

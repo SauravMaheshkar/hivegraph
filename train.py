@@ -6,10 +6,11 @@ from absl import app, flags
 from ml_collections import config_flags
 from torch.optim import AdamW
 
-from hivegraph.engine import Trainer
+from hivegraph.automodel import AutoModel
+from hivegraph.engine import AutoTrainer
 from hivegraph.io.autodataset import AutoDataset
-from hivegraph.nn.automodel import AutoModel
 from hivegraph.utils import set_seed
+
 
 FLAGS = flags.FLAGS
 config_flags.DEFINE_config_file(
@@ -41,21 +42,39 @@ def main(argv):
     dataset = AutoDataset(dataset_name=FLAGS.config.dataset)
     dataset = dataset.get_dataset()
 
-    gnn = AutoModel(
-        num_features=dataset.num_features,
-        num_classes=dataset.num_classes,
-        model_config=FLAGS.config.model,
-    ).to(device)
+    if FLAGS.config.task == "classification":
+        gnn = AutoModel(
+            task=FLAGS.config.task,
+            num_features=dataset.num_features,
+            num_classes=dataset.num_classes,
+            model_config=FLAGS.config.model,
+        ).to(device)
 
-    trainer = Trainer(
-        model=gnn,
-        dataset=dataset,
-        device=device,
-        criterion=FLAGS.config.criterion,
-        num_folds=FLAGS.config.num_folds,
-        random_state=FLAGS.config.random_seed,
-        test_metric=FLAGS.config.test_metric,
-    )
+        trainer = AutoTrainer(
+            task=FLAGS.config.task,
+            model=gnn,
+            dataset=dataset,
+            device=device,
+            criterion=FLAGS.config.criterion,
+            num_folds=FLAGS.config.num_folds,
+            random_state=FLAGS.config.random_seed,
+            test_metric=FLAGS.config.test_metric,
+        )
+
+    elif FLAGS.config.task == "transductive":
+        gnn = AutoModel(
+            task=FLAGS.config.task,
+            num_features=dataset.num_features,
+            model_config=FLAGS.config.model,
+        ).to(device)
+
+        trainer = AutoTrainer(
+            task=FLAGS.config.task,
+            model=gnn,
+            dataset=dataset,
+            device=device,
+            random_state=FLAGS.config.random_seed,
+        )
 
     trainer.fit(
         epochs=FLAGS.config.num_epochs,
