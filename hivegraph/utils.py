@@ -3,6 +3,8 @@ import random
 
 import numpy as np
 import torch
+from torch_geometric.data import Data
+
 
 __all__ = ["set_seed"]
 
@@ -21,3 +23,19 @@ def set_seed(seed: int = 42) -> None:
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     os.environ["PYTHONHASHSEED"] = str(seed)
+
+
+def num_graphs(data: Data) -> int:
+    """
+    Utility function to return the number of graphs in a data object
+
+    Args:
+        data(Data): Data object
+
+    Returns:
+        Number of graphs in the data object
+    """
+    if hasattr(data, "num_graphs"):
+        return data.num_graphs
+    else:
+        return data.x.size(0)
