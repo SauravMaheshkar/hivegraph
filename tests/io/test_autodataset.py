@@ -24,6 +24,11 @@ from hivegraph.io.autodataset import AutoDataset
             does_not_raise(),
             id="Peptides-func",
         ),
+        pytest.param(
+            "Cora",
+            does_not_raise(),
+            id="Cora",
+        ),
     ],
 )
 def test_AutoDataset(dataset_name: str, exception: Exception) -> None:

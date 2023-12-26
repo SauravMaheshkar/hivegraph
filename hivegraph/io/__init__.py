@@ -1,5 +1,6 @@
 from typing import List
 
+
 TU_DATASETS: List[str] = [
     "MUTAG",
     "PROTEINS",
@@ -9,3 +10,5 @@ TU_DATASETS: List[str] = [
 ]
 
 LRGB_DATASETS: List[str] = ["Peptides-func"]
+
+TRANSDUCTIVE_DATASETS: List[str] = ["Cora", "Citeseer", "Pubmed", "DBLP"]

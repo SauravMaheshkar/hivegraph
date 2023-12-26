@@ -4,11 +4,12 @@ from typing import List
 import torch
 import torch_geometric.transforms as T
 from torch_geometric.data.dataset import Dataset
-from torch_geometric.datasets import LRGBDataset, TUDataset
+from torch_geometric.datasets import CitationFull, LRGBDataset, Planetoid, TUDataset
 from torch_geometric.utils import degree
 
-from hivegraph.io import LRGB_DATASETS, TU_DATASETS
+from hivegraph.io import LRGB_DATASETS, TRANSDUCTIVE_DATASETS, TU_DATASETS
 from hivegraph.io.transforms import NormalizedDegree
+
 
 __all__: List[str] = ["AutoDataset"]
 
@@ -17,8 +18,14 @@ BINARY_CLASSIFICATION_DATASTES: List[str] = TU_DATASETS
 
 MULTI_CLASSIFICATION_DATASETS: List[str] = LRGB_DATASETS
 
-SUPPORTED_DATASETS: List[str] = (
+CLASSIFICATION_DATASETS: List[str] = (
     BINARY_CLASSIFICATION_DATASTES + MULTI_CLASSIFICATION_DATASETS
+)
+
+SUPPORTED_DATASETS: List[str] = (
+    BINARY_CLASSIFICATION_DATASTES
+    + MULTI_CLASSIFICATION_DATASETS
+    + TRANSDUCTIVE_DATASETS
 )
 
 
@@ -57,11 +64,24 @@ class AutoDataset:
             self.dataset._data.edge_attr = None
         elif self.dataset_name in LRGB_DATASETS:
             self.dataset = LRGBDataset(root=self.path, name=self.dataset_name)
+        elif self.dataset_name in TRANSDUCTIVE_DATASETS:
+            self.dataset = (CitationFull if self.dataset_name == "DBLP" else Planetoid)(
+                root=self.path, name=self.dataset_name, transform=T.NormalizeFeatures()
+            )
 
         return self.dataset
 
     def process(self) -> Dataset:
         self.dataset = self.download()
+
+        if self.dataset_name in CLASSIFICATION_DATASETS:
+            self.process_classification_dataset()
+        elif self.dataset_name in TRANSDUCTIVE_DATASETS:
+            self.process_transductive_dataset()
+
+        return self.dataset
+
+    def process_classification_dataset(self) -> Dataset:
         if self.dataset._data.x is None:
             max_degree = 0
             degs = []
@@ -104,7 +124,8 @@ class AutoDataset:
                     [self.dataset.transform, T.ToDense(num_nodes)]
                 )
 
-        return self.dataset
+    def process_transductive_dataset(self) -> Dataset:
+        pass
 
     def __repr__(self) -> str:
         if self.dataset is None:
