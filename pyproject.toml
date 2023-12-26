@@ -55,6 +55,13 @@ profile = "black"
 [tool.black]
 line-length = 88
 
+[tool.ruff]
+select = ["E", "F"]
+line-length = 88
+
+[tool.ruff.isort]
+lines-after-imports = 2
+
 [tool.pylint.messages_control]
 disable = [
     "no-member",
