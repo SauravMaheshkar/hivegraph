@@ -17,6 +17,10 @@ class GRACE(torch.nn.Module):
         num_features: int,
         hidden: int,
         num_layers: int,
+        drop_edge_rate_1: float,
+        drop_edge_rate_2: float,
+        drop_feature_rate_1: float,
+        drop_feature_rate_2: float,
         activation: Callable = F.relu,
         base_model: torch.nn.Module = GCNConv,
         projection_dim: int = 128,
@@ -40,6 +44,18 @@ class GRACE(torch.nn.Module):
             torch.nn.Linear(projection_dim, projection_dim),
         )
 
+        self.drop_edge_rate_1 = drop_edge_rate_1
+        self.drop_edge_rate_2 = drop_edge_rate_2
+        self.drop_feature_rate_1 = drop_feature_rate_1
+        self.drop_feature_rate_2 = drop_feature_rate_2
+
+    def reset_parameters(self) -> None:
+        for conv_layer in self.encoder_module.conv:
+            conv_layer.reset_parameters()
+        for layer in self.projection_head:
+            if hasattr(layer, "reset_parameters"):
+                layer.reset_parameters()
+
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """
         Compute a forward pass through the encoder module.
@@ -57,10 +73,6 @@ class GRACE(torch.nn.Module):
         self,
         x: torch.Tensor,
         edge_index: torch.Tensor,
-        drop_edge_rate_1: float,
-        drop_edge_rate_2: float,
-        drop_feature_rate_1: float,
-        drop_feature_rate_2: float,
     ) -> torch.Tensor:
         """
         Perform a single training step.
@@ -75,12 +87,12 @@ class GRACE(torch.nn.Module):
         # Generate Graph Views
 
         ## Removing Edges (RE)
-        edge_index_1 = dropout_adj(edge_index, p=drop_edge_rate_1)[0]
-        edge_index_2 = dropout_adj(edge_index, p=drop_edge_rate_2)[0]
+        edge_index_1 = dropout_adj(edge_index, p=self.drop_edge_rate_1)[0]
+        edge_index_2 = dropout_adj(edge_index, p=self.drop_edge_rate_2)[0]
 
         ## Masking Node Features (MF)
-        x_1 = drop_feature(x, drop_prob=drop_feature_rate_1)
-        x_2 = drop_feature(x, drop_prob=drop_feature_rate_2)
+        x_1 = drop_feature(x, drop_prob=self.drop_feature_rate_1)
+        x_2 = drop_feature(x, drop_prob=self.drop_feature_rate_2)
 
         ## Generating views
         z1 = self.forward(x_1, edge_index_1)

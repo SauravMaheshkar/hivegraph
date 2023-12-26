@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional
 
 import torch
 import wandb
@@ -19,7 +19,6 @@ class TransductiveTrainer(BaseTrainer):
         self,
         model: torch.nn.Module,
         dataset: Dataset,
-        criterion: Optional[Callable],
         device: str = "cpu",
         random_state: int = 42,
     ) -> None:
@@ -73,7 +72,7 @@ class TransductiveTrainer(BaseTrainer):
             print("Training Stats: ", stats)
 
     def train_step(
-        self, train_dataloder: Iterable, optimizer: torch.optim.Optimizer
+        self, train_dataloder: Iterable, optimizer: torch.optim.Optimizer, **kwargs
     ) -> float:
         self.model.train()
 
@@ -82,7 +81,9 @@ class TransductiveTrainer(BaseTrainer):
             optimizer.zero_grad()
             data = data.to(self.device)
             if hasattr(self.model, "train_step"):
-                loss = self.model.train_step(data)
+                loss = self.model.train_step(
+                    x=data.x, edge_index=data.edge_index, **kwargs
+                )
             else:
                 raise NotImplementedError
             loss.backward()
