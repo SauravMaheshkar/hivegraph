@@ -9,5 +9,5 @@ Currently has implementations for :-
 
 Example Training Script
 ```
-python train.py --config=src/configs/gin.py
+python train.py --config=hivegraph/configs/classification/gin.py
 ```
