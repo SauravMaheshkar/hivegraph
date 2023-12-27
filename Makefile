@@ -12,6 +12,7 @@ clean:
 	rm -rf .pytest_cache/
 	rm -rf .ruff_cache/
 	rm -rf wandb/
+	rm -rf artifacts/
 
 ## Testing
 test:

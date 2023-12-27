@@ -3,7 +3,7 @@ from typing import Callable, List, Optional
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
-from torch_geometric.utils import dropout_adj
+from torch_geometric.utils import dropout_edge
 
 from hivegraph.augmentations import drop_feature
 
@@ -87,8 +87,8 @@ class GRACE(torch.nn.Module):
         # Generate Graph Views
 
         ## Removing Edges (RE)
-        edge_index_1 = dropout_adj(edge_index, p=self.drop_edge_rate_1)[0]
-        edge_index_2 = dropout_adj(edge_index, p=self.drop_edge_rate_2)[0]
+        edge_index_1 = dropout_edge(edge_index=edge_index, p=self.drop_edge_rate_1)[0]
+        edge_index_2 = dropout_edge(edge_index=edge_index, p=self.drop_edge_rate_2)[0]
 
         ## Masking Node Features (MF)
         x_1 = drop_feature(x, drop_prob=self.drop_feature_rate_1)
