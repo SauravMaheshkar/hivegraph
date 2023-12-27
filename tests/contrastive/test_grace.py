@@ -29,6 +29,10 @@ def test_grace(
         num_features=get_dataset.num_features,
         num_layers=NUM_LAYERS,
         hidden=HIDDEN_DIM,
+        drop_edge_rate_1=0.2,
+        drop_edge_rate_2=0.4,
+        drop_feature_rate_1=0.3,
+        drop_feature_rate_2=0.4,
     )
     # Assert Model is a torch.nn.Module
     assert isinstance(grace, torch.nn.Module)
