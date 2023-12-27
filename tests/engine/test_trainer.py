@@ -28,6 +28,16 @@ def test_autotrainer(get_dataset, task: str, model_name: str) -> None:
     if task == "classification":
         config.update({"num_classes": get_dataset.num_classes})
 
+    elif task == "transductive" and model_name == "GRACE":
+        config.update(
+            {
+                "drop_edge_rate_1": 0.2,
+                "drop_edge_rate_2": 0.4,
+                "drop_feature_rate_1": 0.3,
+                "drop_feature_rate_2": 0.4,
+            }
+        )
+
     # Assert Model is a torch.nn.Module
     model = AutoModel(task, config)
     assert isinstance(model, torch.nn.Module)
