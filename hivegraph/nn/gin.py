@@ -12,10 +12,58 @@ from torch_geometric.nn import (
     global_mean_pool,
 )
 
+
 __all__: List[str] = ["GIN"]
 
 
 class GIN(torch.nn.Module):
+    """
+    Implementation of Graph Isomorphism Networks (GIN) from
+    “How Powerful are Graph Neural Networks?” <https://arxiv.org/abs/1810.00826>
+    by Keyulu Xu, Weihua Hu, Jure Leskovec, Stefanie Jegelka.
+
+    Args:
+        num_features (int): Number of input features.
+        num_classes (int): Number of output classes.
+        num_layers (int): Number of GINConv layers.
+        hidden (int): Number of hidden units.
+        use_eps (bool, optional): If True, epsilon is a learnable parameter.
+            Defaults to False.
+        use_jump (bool, optional): If True, use JumpingKnowledge to aggregate
+            representations from all layers. Defaults to False.
+        jump_mode (str, optional): JumpingKnowledge aggregation mode.
+            Must be one of 'cat', 'max', or 'lstm'. Defaults to 'cat'.
+        dropout (float, optional): Dropout probability. Defaults to 0.5.
+        batchnorm (str, optional): Batchnorm mode. Must be one of 'first',
+            'last', or 'sequential'. Defaults to 'last'.
+        readout (str, optional): Readout function. Must be one of 'mean',
+            'max', or 'sum'. Defaults to 'mean'.
+
+    Supported batchnorm modes:
+
+    * `first`: Batchnorm is applied to the input features of the first layer.
+    * `last`: Batchnorm is applied to the output features of the last layer.
+    * `sequential`: Batchnorm is applied to the output features of each layer.
+
+    Supported readout functions:
+
+    * mean
+    * max
+    * sum
+
+    Supported JumpingKnowledge aggregation modes:
+
+    * `cat`: Concatenate representations from all layers.
+    * `max`: Take the maximum representation across all layers.
+    * `lstm`: Use a LSTM to aggregate representations from all layers.
+
+    References:
+        * https://github.com/pyg-team/pytorch_geometric/blob/master/benchmark/kernel/gin.py
+
+    Raises:
+        AssertionError: If batchnorm, readout, or jump_mode is not supported.
+    """  # noqa: E501
+
     def __init__(
         self,
         num_features: int,
@@ -30,31 +78,6 @@ class GIN(torch.nn.Module):
         readout: str = "mean",
         model_name: str = "GIN",
     ) -> None:
-        """
-        Implementation of Graph Isomorphism Networks (GIN) from
-        “How Powerful are Graph Neural Networks?” <https://arxiv.org/abs/1810.00826>
-        by Keyulu Xu, Weihua Hu, Jure Leskovec, Stefanie Jegelka.
-
-        Args:
-            num_features (int): Number of input features.
-            num_classes (int): Number of output classes.
-            num_layers (int): Number of GINConv layers.
-            hidden (int): Number of hidden units.
-            use_eps (bool, optional): If True, epsilon is a learnable parameter.
-                Defaults to False.
-            use_jump (bool, optional): If True, use JumpingKnowledge to aggregate
-                representations from all layers. Defaults to False.
-            jump_mode (str, optional): JumpingKnowledge aggregation mode.
-                Must be one of 'cat', 'max', or 'lstm'. Defaults to 'cat'.
-            dropout (float, optional): Dropout probability. Defaults to 0.5.
-            batchnorm (str, optional): Batchnorm mode. Must be one of 'first',
-                'last', or 'sequential'. Defaults to 'last'.
-            readout (str, optional): Readout function. Must be one of 'mean',
-                'max', or 'sum'. Defaults to 'mean'.
-
-        References:
-            * https://github.com/pyg-team/pytorch_geometric/blob/master/benchmark/kernel/gin.py
-        """
         super().__init__()
         self.use_jump = use_jump
 
@@ -133,6 +156,7 @@ class GIN(torch.nn.Module):
         )
 
     def reset_parameters(self) -> None:
+        """Reset the parameters of the model."""
         self.initialization.reset_parameters()
         for mp_layer in self.mp_layers:
             mp_layer.reset_parameters()
@@ -141,6 +165,15 @@ class GIN(torch.nn.Module):
                 layer.reset_parameters()
 
     def forward(self, data: Data) -> torch.Tensor:
+        """
+        Compute a forward pass through the model.
+
+        Args:
+            data (Data): Data object.
+
+        Returns:
+            torch.Tensor: Logits for each class.
+        """
         x, edge_index, batch = data.x, data.edge_index, data.batch
         x = self.initialization(x, edge_index)
         if self.use_jump:

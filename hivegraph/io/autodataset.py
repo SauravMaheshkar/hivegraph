@@ -30,6 +30,25 @@ SUPPORTED_DATASETS: List[str] = (
 
 
 class AutoDataset:
+    """
+    Helper class to instantiate a dataset based on the dataset name.
+
+    Args:
+        dataset_name (str): Name of the dataset.
+        path (str, optional): Path to the dataset. Defaults to "artifacts/data/".
+        sparse (bool, optional): If True, the dataset is returned as a sparse
+            dataset. Defaults to True.
+        cleaned (bool, optional): If True, the dataset is returned as a cleaned
+            dataset. Defaults to False.
+
+    References:
+
+    * https://github.com/pyg-team/pytorch_geometric/blob/master/benchmark/kernel/datasets.py
+
+    Raises:
+        AssertionError: If the dataset name is not supported.
+    """
+
     def __init__(
         self,
         dataset_name: str,
@@ -37,10 +56,6 @@ class AutoDataset:
         sparse: bool = True,
         cleaned: bool = False,
     ) -> None:
-        """
-        References:
-        * https://github.com/pyg-team/pytorch_geometric/blob/master/benchmark/kernel/datasets.py
-        """
         assert dataset_name in SUPPORTED_DATASETS, (
             f"Dataset {dataset_name} is not supported. "
             f"Supported datasets are {SUPPORTED_DATASETS}."
@@ -52,11 +67,26 @@ class AutoDataset:
         self.dataset = None
 
     def get_dataset(self) -> Dataset:
+        """
+        Fetches the dataset
+
+        Returns:
+            Dataset: PyG dataset.
+        """
         if self.dataset is None:
             self.dataset = self.process()
         return self.dataset
 
     def download(self) -> Dataset:
+        """
+        Downloads the dataset
+
+        Returns:
+            Dataset: PyG dataset.
+
+        Raises:
+            NotImplementedError: If the dataset is not implemented.
+        """
         if self.dataset_name in TU_DATASETS:
             self.dataset = TUDataset(
                 root=self.path, name=self.dataset_name, cleaned=self.cleaned
@@ -68,20 +98,39 @@ class AutoDataset:
             self.dataset = (CitationFull if self.dataset_name == "DBLP" else Planetoid)(
                 root=self.path, name=self.dataset_name, transform=T.NormalizeFeatures()
             )
+        else:
+            raise NotImplementedError(f"Dataset {self.dataset_name} not implemented.")
 
         return self.dataset
 
     def process(self) -> Dataset:
+        """
+        Processes the dataset
+
+        Returns:
+            Dataset: PyG dataset.
+
+        Raises:
+            NotImplementedError: If the dataset is not implemented.
+        """
         self.dataset = self.download()
 
         if self.dataset_name in CLASSIFICATION_DATASETS:
             self.process_classification_dataset()
         elif self.dataset_name in TRANSDUCTIVE_DATASETS:
             self.process_transductive_dataset()
+        else:
+            raise NotImplementedError(f"Dataset {self.dataset_name} not implemented.")
 
         return self.dataset
 
     def process_classification_dataset(self) -> Dataset:
+        """
+        Processes the classification dataset
+
+        Returns:
+            Dataset: PyG dataset.
+        """
         if self.dataset._data.x is None:
             max_degree = 0
             degs = []
@@ -125,9 +174,21 @@ class AutoDataset:
                 )
 
     def process_transductive_dataset(self) -> Dataset:
+        """
+        Processes the transductive dataset
+
+        Returns:
+            Dataset: PyG dataset.
+        """
         pass
 
     def __repr__(self) -> str:
+        """
+        String representation of the dataset.
+
+        Returns:
+            str: String representation of the dataset.
+        """
         if self.dataset is None:
             return f"AutoDataset({self.dataset_name})"
         else:

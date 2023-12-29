@@ -1,12 +1,13 @@
 import os
 import random
+from typing import List
 
 import numpy as np
 import torch
 from torch_geometric.data import Data
 
 
-__all__ = ["set_seed"]
+__all__: List[str] = ["set_seed", "num_graphs"]
 
 
 def set_seed(seed: int = 42) -> None:
