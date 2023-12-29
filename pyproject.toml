@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 description = "Python Framework based on PyG for working with Graph Neural Networks"
 name = "hivegraph"
-version = "0.0.1"
+version = "0.0.2"
 authors = [{ name = "Saurav Maheshkar", email = "sauravvmaheshkar@gmail.com" }]
 readme = "docs/README.md"
 requires-python = ">=3.8"
