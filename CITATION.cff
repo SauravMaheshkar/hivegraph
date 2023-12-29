@@ -1,0 +1,14 @@
+---
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+title: "HiveGraph: Python Framework based on PyG for working with Graph Neural Networks"
+type: software
+authors:
+  - given-names: Saurav Maheshkar
+    email: sauravvmaheshkar@gmail.com
+    orcid: 'https://orcid.org/0000-0002-5371-4651'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.10440489
+license: MIT
+url: "https://github.com/SauravMaheshkar/hivegraph"
