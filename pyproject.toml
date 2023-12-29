@@ -7,7 +7,7 @@ description = "Python Framework based on PyG for working with Graph Neural Netwo
 name = "hivegraph"
 version = "0.0.1"
 authors = [{ name = "Saurav Maheshkar", email = "sauravvmaheshkar@gmail.com" }]
-readme = ".github/README.md"
+readme = "docs/README.md"
 requires-python = ">=3.8"
 keywords = [
     "deep-learning",
