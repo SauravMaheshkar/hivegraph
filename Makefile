@@ -8,6 +8,7 @@ requirements:
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type f -name "__pycache__" -delete
+	rm -rf docs/_build/
 	rm -rf .mypy_cache/
 	rm -rf .pytest_cache/
 	rm -rf .ruff_cache/

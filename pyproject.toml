@@ -41,6 +41,7 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest"]
 dev = ["hivegraph[test]", "black", "mypy>=0.900", "pre-commit>=2.18.0", "ruff"]
+docs = ["sphinx"]
 
 [project.urls]
 homepage = "https://github.com/SauravMaheshkar/hivegraph"
@@ -56,11 +57,15 @@ profile = "black"
 line-length = 88
 
 [tool.ruff]
-select = ["E", "F"]
+select = ["E", "F", "W"]
+ignore = ["W605"]
 line-length = 88
 
 [tool.ruff.isort]
 lines-after-imports = 2
+
+[tool.ruff.pycodestyle]
+max-doc-length = 300
 
 [tool.pylint.messages_control]
 disable = [
