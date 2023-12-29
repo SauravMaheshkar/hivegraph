@@ -2,6 +2,7 @@ from typing import List
 
 import torch
 
+
 __all__: List[str] = ["drop_feature"]
 
 
@@ -13,7 +14,7 @@ def drop_feature(
 
     Randomly masks a fraction of dimensions with zeros in node features.
 
-    Ref: Section 3.2.2 of https://arxiv.org/pdf/2006.04131v2.pdf
+    Ref: Section 3.2.2 of https://arxiv.org/abs/2006.04131v2
 
     Args:
         x (torch.Tensor): Node features.

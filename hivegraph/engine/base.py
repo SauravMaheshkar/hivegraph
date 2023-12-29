@@ -8,6 +8,10 @@ __all__: List[str] = ["BaseTrainer"]
 
 
 class BaseTrainer(ABC):
+    """
+    Abstract base class for all trainers.
+    """
+
     @abstractmethod
     def fit(
         self,

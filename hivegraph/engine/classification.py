@@ -41,6 +41,8 @@ class ClassificationTrainer(BaseTrainer):
         test_metric: Optional[str] = None,
     ) -> None:
         """
+        Trainer for classification tasks.
+
         Args:
             model(torch.nn.Module): Model
             dataset(Dataset): PyTorch Geometric Dataset
@@ -48,6 +50,9 @@ class ClassificationTrainer(BaseTrainer):
             num_folds(int): Number of folds for K-Fold Cross Validation, defaults to 10
             random_state(int): Random Seed, defaults to 42
             test_metric(str): Test Metric either "Accuracy" or "AUROC", defaults to None
+
+        Raises:
+            ValueError: If the dataset is not supported
         """
         self.model = model
         self.dataset = dataset
@@ -279,6 +284,9 @@ def get_kfold_indices(
 
     Returns:
         A Tuple of 3 lists of torch tensors containing mask indices for splits
+
+    Raises:
+        ValueError: If the dataset is not supported
     """
     if dataset.name in BINARY_CLASSIFICATION_DATASTES:
         skf = StratifiedKFold(

@@ -22,6 +22,15 @@ class TransductiveTrainer(BaseTrainer):
         device: str = "cpu",
         random_state: int = 42,
     ) -> None:
+        """
+        Trainer for transductive learning.
+
+        Args:
+            model (torch.nn.Module): Model to be trained.
+            dataset (Dataset): Dataset to be used for training.
+            device (str, optional): Device to be used for training. Defaults to "cpu".
+            random_state (int, optional): Random state. Defaults to 42.
+        """
         self.model = model
         self.dataset = dataset
         self.device = device
@@ -35,6 +44,16 @@ class TransductiveTrainer(BaseTrainer):
         verbose: bool,
         log_to_wandb: bool,
     ) -> None:
+        """
+        Trains the model on the given dataset
+
+        Args:
+            epochs(int): Number of epochs
+            batch_size(int): batch size
+            optimizer(torch.optim.Optimizer): Optimizer
+            verbose(bool): Whether to print stats, defaults to True
+            log_to_wandb(bool): Whether to log stats to wandb, defaults to False
+        """
         train_losses: List[float] = []
 
         train_dataloder = get_dataloader(self.dataset, batch_size)
@@ -74,6 +93,16 @@ class TransductiveTrainer(BaseTrainer):
     def train_step(
         self, train_dataloder: Iterable, optimizer: torch.optim.Optimizer, **kwargs
     ) -> float:
+        """
+        Performs a single training step
+
+        Args:
+            train_dataloder(Iterable): Training Dataloader
+            optimizer(torch.optim.Optimizer): Optimizer
+
+        Returns:
+            float: Training Loss
+        """
         self.model.train()
 
         total_loss = 0

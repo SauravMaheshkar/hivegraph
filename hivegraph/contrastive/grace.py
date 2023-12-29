@@ -12,6 +12,18 @@ __all__: List[str] = ["GRACE"]
 
 
 class GRACE(torch.nn.Module):
+    """
+    Implementation of deep GRAph Contrastive rEpresentation learning (GRACE).
+
+    .. image:: ../../media/contrastive/grace.png
+
+    References:
+
+    * https://arxiv.org/abs/2006.04131v2
+    * https://github.com/CRIPAC-DIG/GRACE
+    * https://wandb.ai/sauravmaheshkar/GRACE/reports/Graph-Contrastive-Learning--Vmlldzo2MzYxODEy
+    """
+
     def __init__(
         self,
         num_features: int,
@@ -28,6 +40,24 @@ class GRACE(torch.nn.Module):
         model_name: str = "GRACE",
         **kwargs,
     ) -> None:
+        """
+        Initialize the GRACE model.
+
+        Args:
+            num_features (int): Number of input features.
+            hidden (int): Number of hidden units.
+            num_layers (int): Number of layers.
+            drop_edge_rate_1 (float): Drop edge rate for the first view.
+            drop_edge_rate_2 (float): Drop edge rate for the second view.
+            drop_feature_rate_1 (float): Drop feature rate for the first view.
+            drop_feature_rate_2 (float): Drop feature rate for the second view.
+            activation (Callable, optional): Activation function. Defaults to F.relu.
+            base_model (torch.nn.Module, optional): Base model. Defaults to GCNConv.
+            projection_dim (int, optional): Dimension of the projected representations.
+                Defaults to 128.
+            tau (Optional[float], optional): Temperature parameter. Defaults to 0.5.
+            model_name (str, optional): Name of the model. Defaults to "GRACE".
+        """
         super(GRACE, self).__init__(**kwargs)
         self.encoder_module = GRACEEncoder(
             in_channels=num_features,
@@ -48,26 +78,6 @@ class GRACE(torch.nn.Module):
         self.drop_edge_rate_2 = drop_edge_rate_2
         self.drop_feature_rate_1 = drop_feature_rate_1
         self.drop_feature_rate_2 = drop_feature_rate_2
-
-    def reset_parameters(self) -> None:
-        for conv_layer in self.encoder_module.conv:
-            conv_layer.reset_parameters()
-        for layer in self.projection_head:
-            if hasattr(layer, "reset_parameters"):
-                layer.reset_parameters()
-
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        """
-        Compute a forward pass through the encoder module.
-
-        Args:
-            x (torch.Tensor): Node features.
-            edge_index (torch.Tensor): Edge indices.
-
-        Returns:
-            torch.Tensor: Representations from the encoder module.
-        """
-        return self.encoder_module(x, edge_index)
 
     def train_step(
         self,
@@ -103,43 +113,18 @@ class GRACE(torch.nn.Module):
 
         return loss
 
-    def project(self, z: torch.Tensor) -> torch.Tensor:
-        """
-        Project the representations to a lower-dimensional space.
-
-        This has been shown to enchance the expression power of the critic,
-        For details refer to the section 3.2.1
-
-        Ref: https://arxiv.org/pdf/2006.04131v2.pdf
-
-        Args:
-            z (torch.Tensor): Representations from the encoder module.
-
-        Returns:
-            torch.Tensor: Projected representations.
-        """
-        return self.projection_head(z)
-
-    def compute_cosine_sim(self, z1: torch.Tensor, z2: torch.Tensor) -> torch.Tensor:
-        """
-        Compute the cosine similarity between two sets of views.
-
-        Args:
-            z1 (torch.Tensor): First set of views.
-            z2 (torch.Tensor): Second set of views.
-
-        Returns:
-            torch.Tensor: Cosine similarity between the two sets of views.
-        """
-        z1 = torch.nn.functional.normalize(z1)
-        z2 = torch.nn.functional.normalize(z2)
-        return torch.mm(z1, z2.T)
-
     def semi_loss(self, z1: torch.Tensor, z2: torch.Tensor) -> torch.Tensor:
         """
         Compute the "semi_loss" between two given views.
 
-        Space Complexity: O(N^2)
+        Space Complexity: :math:`O(N^2)`
+
+        .. math::
+
+            l(u_i, v_i) = \log \\frac{e^{\\theta (u_i, v_i) / \\tau}}{e^{\\theta (u_i, v_i) / \\tau} + \color{blue}{\sum_{k=1}^{N} \mathbb{1}_{[k \\neq 1]} e^{\\theta(u_i, v_k)/ \\tau}} + \color{green}{\sum_{k=1}^{N}\mathbb{1}_{[k \\neq 1]} e^{\\theta(u_i, u_k)/ \\tau}} }
+
+        * The equation in blue represents the loss between the inter-view negative pairs.
+        * The equation in green represents the loss between the intra-view negative pairs.
 
         Args:
             z1 (torch.Tensor): First set of views.
@@ -147,7 +132,7 @@ class GRACE(torch.nn.Module):
 
         Returns:
             torch.Tensor: "semi_loss" between the two sets of views.
-        """
+        """  # noqa: E501
         intraview_pairs = self.normalize_with_temp(self.compute_cosine_sim(z1, z1))
         interview_pairs = self.normalize_with_temp(self.compute_cosine_sim(z1, z2))
 
@@ -162,7 +147,7 @@ class GRACE(torch.nn.Module):
         """
         Calculate the "semi_loss" between a batch of views
 
-        Space Complexity: O(BN)
+        Space Complexity: :math:`O(BN)`
 
         Args:
             z1 (torch.Tensor): First batch of views.
@@ -215,12 +200,18 @@ class GRACE(torch.nn.Module):
         mean: Optional[bool] = True,
         batch_size: int = 0,
     ) -> torch.Tensor:
-        """
+        r"""
         Compute the overall loss for all positive pairs.
 
         Eqn(2) from the paper.
 
-        Ref: https://arxiv.org/pdf/2006.04131v2.pdf
+        .. math::
+
+            \mathcal{J} = \frac{1}{2N} \displaystyle \sum_{i=1}^{N} \left ( l(u_i, v_i) + l(v_i, u_i) \right)
+
+        References:
+
+        * https://arxiv.org/abs/2006.04131v2
 
         Args:
             z1 (torch.Tensor): First set of views.
@@ -230,7 +221,7 @@ class GRACE(torch.nn.Module):
 
         Returns:
             torch.Tensor: Overall loss.
-        """
+        """  # noqa: E501
         # Generate views
         # one is used as the anchor
         # other forms the positive sample
@@ -253,6 +244,53 @@ class GRACE(torch.nn.Module):
 
         return loss
 
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        """
+        Compute a forward pass through the encoder module.
+
+        Args:
+            x (torch.Tensor): Node features.
+            edge_index (torch.Tensor): Edge indices.
+
+        Returns:
+            torch.Tensor: Representations from the encoder module.
+        """
+        return self.encoder_module(x, edge_index)
+
+    def compute_cosine_sim(self, z1: torch.Tensor, z2: torch.Tensor) -> torch.Tensor:
+        """
+        Compute the cosine similarity between two sets of views.
+
+        Args:
+            z1 (torch.Tensor): First set of views.
+            z2 (torch.Tensor): Second set of views.
+
+        Returns:
+            torch.Tensor: Cosine similarity between the two sets of views.
+        """
+        z1 = torch.nn.functional.normalize(z1)
+        z2 = torch.nn.functional.normalize(z2)
+        return torch.mm(z1, z2.T)
+
+    def project(self, z: torch.Tensor) -> torch.Tensor:
+        """
+        Project the representations to a lower-dimensional space.
+
+        This has been shown to enchance the expression power of the critic,
+        For details refer to the section 3.2.1
+
+        References:
+
+        * https://arxiv.org/abs/2006.04131v2
+
+        Args:
+            z (torch.Tensor): Representations from the encoder module.
+
+        Returns:
+            torch.Tensor: Projected representations.
+        """
+        return self.projection_head(z)
+
     def normalize_with_temp(self, x: torch.Tensor) -> torch.Tensor:
         """
         Normalize the given tensor with the temperature.
@@ -265,8 +303,18 @@ class GRACE(torch.nn.Module):
         """
         return torch.exp(x / self.tau)
 
+    def reset_parameters(self) -> None:
+        """Reset the parameters of the model."""
+        for conv_layer in self.encoder_module.conv:
+            conv_layer.reset_parameters()
+        for layer in self.projection_head:
+            if hasattr(layer, "reset_parameters"):
+                layer.reset_parameters()
+
 
 class GRACEEncoder(torch.nn.Module):
+    """Implementation of the Encoder for GRACE"""
+
     def __init__(
         self,
         in_channels: int,
@@ -275,6 +323,16 @@ class GRACEEncoder(torch.nn.Module):
         base_model=GCNConv,
         k: int = 2,
     ) -> None:
+        """
+        Initialize the encoder module.
+
+        Args:
+            in_channels (int): Number of input channels.
+            out_channels (int): Number of output channels.
+            activation (Callable, optional): Activation function. Defaults to F.relu.
+            base_model (torch.nn.Module, optional): Base model. Defaults to GCNConv.
+            k (int, optional): Number of layers. Defaults to 2.
+        """
         super(GRACEEncoder, self).__init__()
         self.base_model = base_model
 
@@ -288,6 +346,16 @@ class GRACEEncoder(torch.nn.Module):
         self.activation = activation
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        """
+        Compute a forward pass through the encoder module.
+
+        Args:
+            x (torch.Tensor): Node features.
+            edge_index (torch.Tensor): Edge indices.
+
+        Returns:
+            torch.Tensor: Representations from the encoder module.
+        """
         for i in range(self.k):
             x = self.activation(self.conv[i](x, edge_index))
         return x

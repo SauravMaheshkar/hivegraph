@@ -14,10 +14,54 @@ from torch_geometric.nn import (
     global_mean_pool,
 )
 
+
 __all__: List[str] = ["GCN"]
 
 
 class GCN(torch.nn.Module):
+    """
+    Implementation of Graph Convolutional Network
+
+    Args:
+        num_features (int): Number of input features.
+        num_classes (int): Number of output classes.
+        num_layers (int): Number of GINConv layers.
+        hidden (int): Number of hidden units.
+        dropout (float, optional): Dropout probability. Defaults to 0.5.
+        use_jump (bool, optional): If True, use JumpingKnowledge to aggregate
+            representations from all layers. Defaults to False.
+        conv_variant (str, optional): Convolutional Layer to be used.
+            Must be one of 'GCN' or 'ResGatedGraph'. Defaults to 'GCN'.
+        jump_mode (str, optional): JumpingKnowledge aggregation mode.
+            Must be one of 'cat', 'max', or 'lstm'. Defaults to 'cat'.
+        readout (str, optional): Readout function. Must be one of 'mean',
+            'max', or 'sum'. Defaults to 'mean'.
+
+    Supported convolutional layers:
+
+    * GCNConv
+    * GraphSAGEConv
+    * ResGatedGraphConv
+
+    Supported readout functions:
+
+    * mean
+    * max
+    * sum
+
+    Supported JumpingKnowledge aggregation modes:
+
+    * `cat`: Concatenate representations from all layers.
+    * `max`: Take the maximum representation across all layers.
+    * `lstm`: Use a LSTM to aggregate representations from all layers.
+
+    References:
+        * https://github.com/pyg-team/pytorch_geometric/blob/master/benchmark/kernel/gcn.py
+
+    Raises:
+        AssertionError: If `conv_variant`, `readout`, or `jump_mode` is not supported.
+    """  # noqa: E501
+
     def __init__(
         self,
         num_features: int,
@@ -31,27 +75,6 @@ class GCN(torch.nn.Module):
         readout: str = "mean",
         model_name: str = "GCN",
     ) -> None:
-        """
-        Implementation of Graph Convolutional Network
-
-        Args:
-            num_features (int): Number of input features.
-            num_classes (int): Number of output classes.
-            num_layers (int): Number of GINConv layers.
-            hidden (int): Number of hidden units.
-            dropout (float, optional): Dropout probability. Defaults to 0.5.
-            use_jump (bool, optional): If True, use JumpingKnowledge to aggregate
-                representations from all layers. Defaults to False.
-            conv_variant (str, optional): Convolutional Layer to be used.
-                Must be one of 'GCN' or 'ResGatedGraph'. Defaults to 'GCN'.
-            jump_mode (str, optional): JumpingKnowledge aggregation mode.
-                Must be one of 'cat', 'max', or 'lstm'. Defaults to 'cat'.
-            readout (str, optional): Readout function. Must be one of 'mean',
-                'max', or 'sum'. Defaults to 'mean'.
-
-        References:
-            * https://github.com/pyg-team/pytorch_geometric/blob/master/benchmark/kernel/gcn.py
-        """
         super().__init__()
         self.use_jump = use_jump
 
@@ -107,6 +130,7 @@ class GCN(torch.nn.Module):
         )
 
     def reset_parameters(self) -> None:
+        """Reset the parameters of the model."""
         self.initialization.reset_parameters()
         for conv_layer in self.conv_layers:
             conv_layer.reset_parameters()
@@ -115,6 +139,15 @@ class GCN(torch.nn.Module):
                 layer.reset_parameters()
 
     def forward(self, data: Data) -> torch.Tensor:
+        """
+        Compute a forward pass through the model.
+
+        Args:
+            data (Data): Data object.
+
+        Returns:
+            torch.Tensor: Output of the model.
+        """
         x, edge_index, batch = data.x, data.edge_index, data.batch
         x = F.relu(self.initialization(x, edge_index))
         if self.use_jump:
