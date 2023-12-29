@@ -1,5 +1,7 @@
 ![](https://github.com/SauravMaheshkar/hivegraph/blob/main/docs/media/Github_Banner.png?raw=true)
 
+[![Documentation Status](https://readthedocs.org/projects/hivegraph/badge/?version=latest)](https://hivegraph.readthedocs.io/en/latest/?badge=latest) [![Build and Tests](https://github.com/SauravMaheshkar/hivegraph/actions/workflows/python.yml/badge.svg)](https://github.com/SauravMaheshkar/hivegraph/actions/workflows/python.yml) [![PyPi license](https://badgen.net/pypi/license/pip/)](https://pypi.org/project/hivegraph/) [![PyPi version](https://badgen.net/pypi/v/hivegraph/)](https://pypi.org/project/hivegraph/)
+
 # HiveGraph
 Python Framework based on PyG for working with Graph Neural Networks
 
