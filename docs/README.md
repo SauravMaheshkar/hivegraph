@@ -1,4 +1,4 @@
-![](https://github.com/SauravMaheshkar/hivegraph/blob/docs/docs/media/Github_Banner.png?raw=true)
+![](https://github.com/SauravMaheshkar/hivegraph/blob/main/docs/media/Github_Banner.png?raw=true)
 
 # HiveGraph
 Python Framework based on PyG for working with Graph Neural Networks
