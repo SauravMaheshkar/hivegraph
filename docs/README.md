@@ -4,7 +4,7 @@
 
 
 # HiveGraph
-Python Framework based on PyG for working with Graph Neural Networks
+Python Framework based on PyG for working with Representation Learning using Graph Neural Networks
 
 Currently has implementations for :-
 
