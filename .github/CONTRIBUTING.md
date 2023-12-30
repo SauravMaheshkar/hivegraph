@@ -18,7 +18,7 @@ Once you finish implementing a feature or bug-fix, please open a Pull Request an
    . venv/bin/activate
    ```
 
-> Make sure to use python version `>=3.8` as JAX is only supports `3.8` and higher.
+> The current CI runs on python `3.8` and higher, so please use a corresponding python version
 2. **Install Dependencies:** There is a Makefile in the root of this repository. Simply run `make requirements` to update to latest versions of `pip`, `setuptools` and `wheel`; Install all packages mentioned in `requirements.txt` and install `pre-commit` hooks.
 
 3. **Make Changes:** Make your desired changes and commit using clear and concise commit messages. `pre-commit` will run a bunch of checks to ensure your code meets quality standards. To run those checks manually you can run
