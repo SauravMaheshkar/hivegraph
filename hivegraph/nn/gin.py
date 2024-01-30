@@ -104,14 +104,18 @@ class GIN(torch.nn.Module):
             nn.Sequential(
                 nn.Linear(num_features, hidden),
                 nn.ReLU(),
-                nn.BatchNorm1d(hidden)
-                if batchnorm in ["first", "sequential"]
-                else nn.Identity(),
+                (
+                    nn.BatchNorm1d(hidden)
+                    if batchnorm in ["first", "sequential"]
+                    else nn.Identity()
+                ),
                 nn.Linear(hidden, hidden),
                 nn.ReLU(),
-                nn.BatchNorm1d(hidden)
-                if batchnorm in ["last", "sequential"]
-                else nn.Identity(),
+                (
+                    nn.BatchNorm1d(hidden)
+                    if batchnorm in ["last", "sequential"]
+                    else nn.Identity()
+                ),
             ),
             train_eps=use_eps,
         )
@@ -122,14 +126,18 @@ class GIN(torch.nn.Module):
                     nn.Sequential(
                         nn.Linear(hidden, hidden),
                         nn.ReLU(),
-                        nn.BatchNorm1d(hidden)
-                        if batchnorm in ["first", "sequential"]
-                        else nn.Identity(),
+                        (
+                            nn.BatchNorm1d(hidden)
+                            if batchnorm in ["first", "sequential"]
+                            else nn.Identity()
+                        ),
                         nn.Linear(hidden, hidden),
                         nn.ReLU(),
-                        nn.BatchNorm1d(hidden)
-                        if batchnorm in ["last", "sequential"]
-                        else nn.Identity(),
+                        (
+                            nn.BatchNorm1d(hidden)
+                            if batchnorm in ["last", "sequential"]
+                            else nn.Identity()
+                        ),
                     ),
                     train_eps=use_eps,
                 )
@@ -147,9 +155,11 @@ class GIN(torch.nn.Module):
             self.readout = global_add_pool
 
         self.classification_head = nn.Sequential(
-            nn.Linear(hidden * num_layers, hidden)
-            if (self.use_jump and jump_mode == "cat")
-            else nn.Linear(hidden, hidden),
+            (
+                nn.Linear(hidden * num_layers, hidden)
+                if (self.use_jump and jump_mode == "cat")
+                else nn.Linear(hidden, hidden)
+            ),
             nn.ReLU(),
             nn.Dropout(p=dropout),
             nn.Linear(hidden, num_classes),

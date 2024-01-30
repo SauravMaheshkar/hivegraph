@@ -121,9 +121,11 @@ class GCN(torch.nn.Module):
             self.readout = global_add_pool
 
         self.classification_head = nn.Sequential(
-            nn.Linear(hidden * num_layers, hidden)
-            if (self.use_jump and jump_mode == "cat")
-            else nn.Linear(hidden, hidden),
+            (
+                nn.Linear(hidden * num_layers, hidden)
+                if (self.use_jump and jump_mode == "cat")
+                else nn.Linear(hidden, hidden)
+            ),
             nn.ReLU(),
             nn.Dropout(p=dropout),
             nn.Linear(hidden, num_classes),
