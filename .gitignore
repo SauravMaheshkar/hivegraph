@@ -8,7 +8,7 @@
 dist/
 
 docs/_build
-venv/
+.venv/
 data/
 wandb/
 models/
