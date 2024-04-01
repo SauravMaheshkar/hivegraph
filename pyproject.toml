@@ -57,14 +57,16 @@ profile = "black"
 line-length = 88
 
 [tool.ruff]
-select = ["E", "F", "W"]
-ignore = ["W605"]
 line-length = 88
 
-[tool.ruff.isort]
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["W605"]
+
+[tool.ruff.lint.isort]
 lines-after-imports = 2
 
-[tool.ruff.pycodestyle]
+[tool.ruff.lint.pycodestyle]
 max-doc-length = 300
 
 [tool.pylint.messages_control]
